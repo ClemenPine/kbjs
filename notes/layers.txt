@@ -1,0 +1,33 @@
+Rules:
+A  -> A
+*A -> B
+
+String: "ABBA"
+
+Build trigrams iteratively, break apart higher ngrams if necessary
+AAA -> AAA  -> AAA
+AB  -> A*A  -> A*A
+BA  -> *AA  -> *AA
+BB  -> *A*A -> *A*, A*A
+
+Create map of sequences to their frequency of occurrence
+AAA: freq(AAA)
+A*A: freq(AB) + freq(BB)
+*AA: freq(BA)
+*A*: freq(BB)
+
+Run trigram functions on sequences, lookup ngrams in corpus for counts
+Augment total by looking up monogram count for layer keys
+
+----
+
+ABBA -> AB BB BA
+A*A*AA -> A*, *A, A*, *A, AA
+
+AA -> AA
+AB -> A*A -> A*, *A
+B  -> *A
+BA -> *AA -> *A, AA
+BB -> *A*A -> *A, A*, *A
+
+IT DOESN"T WORK!!!!!!!!!!!!!!!!!!!!
