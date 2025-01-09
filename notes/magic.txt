@@ -1,0 +1,22 @@
+Works for expansions
+-------
+*A -> B
+-------
+ABBA -> AB BB BA
+A*A*AA -> A*, *A, A*, *A, AA
+
+B, B -> *A, *A
+
+AB -> A*
+BB -> A*
+BA -> AA
+
+Does not work for reductions
+-------
+* -> EE
+-------
+
+EEEEEE -> EE, EE, EE, EE, EE
+*** -> **, **
+
+EE -> *
