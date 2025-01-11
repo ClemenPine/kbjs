@@ -1,3 +1,10 @@
+class Util {
+    static product(array, rep) {
+        return rep == 0 ? [[]] : this.product(array, rep - 1)
+            .flatMap(x => array.map(y => [...x, y]))
+    }
+}
+
 class Grams {
     constructor() {
         this.grams = {}
@@ -14,7 +21,7 @@ class Grams {
         let uBound = n > 0 ? n : this.grams.length
         
         return Object.keys(this.grams)
-            .sort((a, b) => this.get(a) < this.get(b))
+            .sort((a, b) => this.count(a) < this.count(b))
             .slice(lBound, uBound)
     }
 
@@ -39,12 +46,12 @@ class Grams {
         return grams
     }
 
-    get(gram) {
+    count(gram) {
         return this.grams[gram] ?? 0
     }
 
     freq(gram) {
-        return this.get(gram) / this.total
+        return this.count(gram) / this.total
     }
 
     static shift(char) {
@@ -53,9 +60,9 @@ class Grams {
 }
 
 export class Corpus {
-    constructor() {
-        this.gramSize = 3
-        this.skipSize = 1
+    constructor(gramSize, skipSize) {
+        this.gramSize = gramSize ?? 3
+        this.skipSize = skipSize ?? 1
 
         this.gram = []
         this.skip = []
@@ -196,11 +203,10 @@ export class Metric {
 
 export class Metrics {
     constructor(...metrics) {
-        this.metrics = {}
+        this.metrics = metrics
         this.gram = Array(3).fill(null).map(x => [])
 
         for (const metric of metrics) {
-            this.metrics[metric.name] = metric
             this.gram[metric.size - 1].push(metric)
         }
     } 
@@ -218,109 +224,96 @@ export class Metrics {
     }
 }
 
-class Motion {
-    constructor(...chords) {
-        this.chords = chords ?? []
-    }
-
-    compile(metrics) {
-        return metrics.gram[this.chords.length]
-    }
-
-    toString() {
-        return this.chords.map(x => x.join(" ")).join(", ")
-    }
-
-    static composite(...motion) {
-        return new Motion(motion.map(x => x.chords).flat())
-    }
-}
-
-export class Board {
-    constructor(board) {
-        this.board = {}
+class Board {
+    static fromArray(arr) {
+        const board = []
 
         let index = 0
-        for (const [y, row] of Object.entries(board ?? {})) {
+        for (const [y, row] of Object.entries(arr ?? {})) {
             for (const [x, f] of Object.entries(row.split(/\s/))) {
-                const pos = new Pos(
+                board.push(new Pos(
                     parseInt(x), 
                     parseInt(y), 
                     parseInt(f), 
                     index
-                )
+                ))
 
-                this.board[pos.p] = pos
                 index += 1
             }
         }
-    }
 
-    get(idx) {
-        return this.board[idx]
-    }
-
-    add(pos) {
-        this.board[pos.p] = pos
-    }
-
-    seq(...pos) {
-        return new Motion(pos.map(x => [this.board[x]]))
-    }
-
-    chord(...pos) {
-        return new Motion([pos.map(x => this.board[x])])
-    }
-
-    fromString(string) {
-        return new Motion(string.split(", ").map(x => this.board[x.split(" ")]))
+        return board
     }
 }
 
 export class Layout {
-    constructor() {
-        this.keymap = {}
-        this.board = new Board()
-    }
-
-    compile(metrics) {        
-        let res = [[]]
-        let res2 = []
-        for (let i=0; i < 2; i++) {
-            const item = []
-
-            for (const prefix of res) {
-                for (const [k, v] of Object.entries(this.keymap)) {
-                    const motions = [...prefix, this.board.fromString(k)]
-                    
-                    const compiled = Motion.composite(...motions).compile(metrics)
-                    
-                    if (compiled) {
-                        console.log()
-                        res2.push([motions, compiled])
-                        // res2[motions.join("|")] = compiled
-                    }
-                    
-                    item.push(motions)
-                }
-            } 
-
-            res = item
-            // console.log(item)
-            // console.log(metrics.gram[i])
-        }
-
-        console.log(res2)
+    constructor({name, author, board, layers}) {
+        this.name = name ?? "Untitled"
+        this.author = author ?? "Unknown"
+        this.board = board
+        this.layers = layers
     }
     
-    static fromJson(letters, board) {
-        let layout = new Layout()
-        layout.board = new Board(board)
+    static fromJson(data) {
+        return new Layout({
+            name: data.name,
+            author: data.author,
+            board: Board.fromArray(data.board), 
+            layers: data.layers.map(x => [...x]),
+        })
+    }
+}
 
-        for (const [i, ch] of Object.entries(letters)) {
-            layout.keymap[layout.board.seq(i)] = ch
+export class Analyzer {
+    constructor({layout, corpus, metrics}) {
+        this.layout = layout
+        this.corpus = corpus.unshift().contains(layout.layers.flat())
+        this.metrics = metrics
+        this.compile()
+    }
+
+    compile() {
+        this.table = []
+        for (const [i, stats] of Object.entries(this.metrics.gram)) {
+            for (const seq of Util.product([...this.layout.board.keys()], parseInt(i) + 1)) {
+                const pos = seq.map(x => this.layout.board[x]) 
+                const compiled = stats.filter(x => x.compile(...pos))
+
+                if (compiled.length) {
+                    this.table.push([seq, compiled])
+                }
+            }
+        }
+    }
+
+    analyze() {
+        const scores = {}
+        for (const stat of this.metrics.metrics) {
+            scores[stat.name] = {
+                count: 0,
+                total: this.corpus.gram[stat.size - 1].total,
+                grams: new Grams(),
+            }
         }
         
-        return layout
+        for (const [seq, stats] of this.table) {
+            const gram = seq.map(x => this.layout.layers[0][x]).join("")
+            const count = this.corpus.gram[seq.length - 1].count(gram)
+
+            for (const stat of stats) {
+                scores[stat.name].count += count
+                scores[stat.name].grams.add(gram, count)
+            }
+        }
+
+        for (const item of Object.values(scores)) {
+            item.grams.total = item.total
+        }
+
+        return scores
+    }
+
+    generate() {
+        
     }
 }
