@@ -28,15 +28,17 @@ const analyzer = new kb.Analyzer({
     )
 })
 
-const scores = analyzer.analyze()
-for (const [name, item] of Object.entries(scores)) {
-    console.log(name, (item.count / item.total * 100).toFixed(3) + "%")
-    for (const gram of item.grams.top(10)) {
-        console.log(gram, (item.grams.freq(gram) * 100).toFixed(3) + "%")
-    }
+console.log(analyzer.analyze())
 
-    console.log()
-}
+// const scores = analyzer.analyze()
+// for (const [name, item] of Object.entries(scores)) {
+//     console.log(name, (item.count / item.total * 100).toFixed(3) + "%")
+//     for (const gram of item.grams.top(10)) {
+//         console.log(gram, (item.grams.freq(gram) * 100).toFixed(3) + "%")
+//     }
+
+//     console.log()
+// }
 
 // let corpus = (await kb.Corpus.load("monkeyracer"))
 //     .unshift()

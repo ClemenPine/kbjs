@@ -1,14 +1,14 @@
 class Util {
-    static product(array, rep) {
-        return rep == 0 ? [[]] : this.product(array, rep - 1)
+    static product(array, repeat) {
+        return repeat == 0 ? [[]] : this.product(array, repeat - 1)
             .flatMap(x => array.map(y => [...x, y]))
     }
 }
 
 class Grams {
-    constructor() {
-        this.grams = {}
-        this.total = 0
+    constructor(grams, total) {
+        this.grams = grams ?? {}
+        this.total = total ?? 0
     }
 
     add(gram, count = 1) {
@@ -264,6 +264,25 @@ export class Layout {
     }
 }
 
+class ScoreBoard {
+    constructor({corpus, metrics}) {
+        this.stat = {} 
+        for (const stat of metrics.metrics) {
+            this.stat[stat.name] = {
+                count: 0,
+                grams: new Grams({}, corpus.gram[stat.size - 1].total),
+            }
+        }
+    }
+
+    update({stats, gram, count}) {
+        for (const stat of stats.map(x => this.stat[x.name])) {
+            stat.count += count
+            stat.grams.grams[gram] = (stat.grams.grams[gram] ?? 0) + count
+        }
+    }
+}
+
 export class Analyzer {
     constructor({layout, corpus, metrics}) {
         this.layout = layout
@@ -287,27 +306,15 @@ export class Analyzer {
     }
 
     analyze() {
-        const scores = {}
-        for (const stat of this.metrics.metrics) {
-            scores[stat.name] = {
-                count: 0,
-                total: this.corpus.gram[stat.size - 1].total,
-                grams: new Grams(),
-            }
-        }
-        
+        const scores = new ScoreBoard({
+            corpus: this.corpus, 
+            metrics: this.metrics
+        })
+
         for (const [seq, stats] of this.table) {
             const gram = seq.map(x => this.layout.layers[0][x]).join("")
             const count = this.corpus.gram[seq.length - 1].count(gram)
-
-            for (const stat of stats) {
-                scores[stat.name].count += count
-                scores[stat.name].grams.add(gram, count)
-            }
-        }
-
-        for (const item of Object.values(scores)) {
-            item.grams.total = item.total
+            scores.update({stats: stats, gram: gram, count: count})
         }
 
         return scores
