@@ -3,6 +3,15 @@ class Util {
         return repeat == 0 ? [[]] : this.product(array, repeat - 1)
             .flatMap(x => array.map(y => [...x, y]))
     }
+
+    static dictzip(arr1, arr2) {
+        const res = {}
+        for (let i=0; i < arr1.length; i++) {
+            res[arr1[i]] = arr2[i]
+        }
+
+        return res
+    }
 }
 
 class Grams {
@@ -55,7 +64,10 @@ class Grams {
     }
 
     static shift(char) {
-        return char.toLowerCase()
+        return Util.dictzip(
+            '!@#$%^&*()_+:{}:<>?\"ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+            '1234567890-=;[];,./\'abcdefghijklmnopqrstuvwxyz',
+        )[char] ?? char
     }
 }
 
@@ -154,6 +166,8 @@ export class Corpus {
             corpus.word.add(word)
         }
 
+        console.log("Loaded Corpus")
+
         return corpus
     }
 
@@ -230,15 +244,17 @@ class Board {
 
         let index = 0
         for (const [y, row] of Object.entries(arr ?? {})) {
-            for (const [x, f] of Object.entries(row.split(/\s/))) {
-                board.push(new Pos(
-                    parseInt(x), 
-                    parseInt(y), 
-                    parseInt(f), 
-                    index
-                ))
-
-                index += 1
+            for (const [x, f] of Object.entries(row.split(/\s+/))) {
+                if (Number.isInteger(Number(f))) {
+                    board.push(new Pos(
+                        parseInt(x),
+                        parseInt(y),
+                        parseInt(f),
+                        index
+                    ))
+    
+                    index += 1
+                }
             }
         }
 
