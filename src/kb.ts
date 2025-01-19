@@ -1,23 +1,23 @@
 class Util {
     /**
      * Computes the product of an array with repetition
-     * @param {Object[]} array An array of arbitrary objects
-     * @param {number} repeat The number of times to repeat the array
-     * @returns {Object[]} A list of the resulting products
+     * @param array An array of arbitrary objects
+     * @param repeat The number of times to repeat the array
+     * @returns A list of the resulting products
      */
-    static product(array, repeat) {
+    static product(array: any[], repeat: number): any[] {
         return repeat == 0 ? [[]] : this.product(array, repeat - 1)
             .flatMap(x => array.map(y => [...x, y]))
     }
 
     /**
      * Zips two arrays into a dictionary, a la python
-     * @param {Object[]} arr1 The array mapped to keys
-     * @param {Object[]} arr2 The array mapped to values
+     * @param {string} arr1 The array mapped to keys
+     * @param {string} arr2 The array mapped to values
      * @returns {any} The dictionary
      */
-    static dictzip(arr1, arr2) {
-        const res = {}
+    static dictzip(arr1: string, arr2: string): {[key: string]: string} {
+        const res: {[key: string]: string} = {}
         for (let i=0; i < arr1.length; i++) {
             res[arr1[i]] = arr2[i]
         }
@@ -27,45 +27,48 @@ class Util {
 }
 
 class Grams {
+    grams: {[key: string]: number}
+    total: number
+    
     /**
      * A set of ngrams and their counts
-     * @param {any} grams A dictionary mapping strings to counts
-     * @param {number} total The total gram count
+     * @param grams A dictionary mapping strings to counts
+     * @param total The total gram count
      */
-    constructor(grams, total) {
-        this.grams = grams ?? {}
-        this.total = total ?? 0
+    constructor(grams: {[key: string]: number} = {}, total: number = 0) {
+        this.grams = grams
+        this.total = total
     }
 
     /**
      * Update the count of a gram
-     * @param {string} gram The ngram to be updated
-     * @param {number} count The amount of new occurrences (default 1)
+     * @param gram The ngram to be updated
+     * @param count The amount of new occurrences (default 1)
      */
-    add(gram, count = 1) {
+    add(gram: string, count: number = 1) {
         this.grams[gram] = (this.grams[gram] ?? 0) + count
         this.total += count
     }
 
     /**
      * Returns the top n ngrams, sorted
-     * @param {number} n The number of ngrams, n > 0 for n largest, n < 0 for n smallest, n = 0 for all
-     * @returns {any} A dictionary mapping the top grams to their counts
+     * @param n The number of ngrams, n > 0 for n largest, n < 0 for n smallest, n = 0 for all
+     * @returns A dictionary mapping the top grams to their counts
      */
-    top(n = 0) {
+    top(n: number = 0): any {
         let lBound = n < 0 ? n : 0
         let uBound = n > 0 ? n : this.grams.length
         
         return Object.keys(this.grams)
-            .sort((a, b) => this.count(a) < this.count(b))
+            .sort((a, b) => this.count(a) - this.count(b))
             .slice(lBound, uBound)
     }
 
     /**
      * Creates a new gram collection with the ngrams unshifted
-     * @returns {Grams} The new grams
+     * @returns The new grams
      */
-    unshift() {        
+    unshift(): Grams {        
         let grams = new Grams()
         for (const [k, v] of Object.entries(this.grams)) {
             let gram = [...k].map(x => Grams.shift(x)).join("")
@@ -77,10 +80,10 @@ class Grams {
 
     /**
      * Creates a new gram collection with ngrams filtered by some function
-     * @param {any} func The function to apply on each gram
-     * @returns {Grams} The new grams
+     * @param func The function to apply on each gram
+     * @returns The new grams
      */
-    filter(func) {
+    filter(func: any): Grams {
         let grams = new Grams()
         for (const [k, v] of Object.entries(this.grams)) {
             if (func(k)) {
@@ -93,28 +96,28 @@ class Grams {
 
     /**
      * Get the number of occurrences for any ngram
-     * @param {string} gram The gram to check for
-     * @returns {number} The amount of occurrences, zero if none found
+     * @param gram The gram to check for
+     * @returns The amount of occurrences, zero if none found
      */
-    count(gram) {
+    count(gram: string): number {
         return this.grams[gram] ?? 0
     }
 
     /**
      * The number of occurrences of any ngram divided by the total
-     * @param {string} gram The gram to check for
-     * @returns {number} The percentage of the gram in grams
+     * @param gram The gram to check for
+     * @returns The percentage of the gram in grams
      */
-    freq(gram) {
+    freq(gram: string): number {
         return this.count(gram) / this.total
     }
 
     /**
      * Convert any shifted character to its unshifted counterpart
-     * @param {string} char The char to unshift, or do nothing if not found
-     * @returns {string} An unshifted character
+     * @param char The char to unshift, or do nothing if not found
+     * @returns An unshifted character
      */
-    static shift(char) {
+    static shift(char: string): string {
         return Util.dictzip(
             '!@#$%^&*()_+:{}:<>?\"ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
             '1234567890-=;[];,./\'abcdefghijklmnopqrstuvwxyz',
@@ -123,14 +126,20 @@ class Grams {
 }
 
 export class Corpus {
+    gramSize: number
+    skipSize: number
+    gram: any[]
+    skip: any[]
+    word: Grams
+
     /**
      * Contains parsed corpus data
-     * @param {number} gramSize The maximum ngram size to process
-     * @param {number} skipSize The maximum skipgram distance
+     * @param gramSize The maximum ngram size to process
+     * @param skipSize The maximum skipgram distance
      */
-    constructor(gramSize, skipSize) {
-        this.gramSize = gramSize ?? 3
-        this.skipSize = skipSize ?? 1
+    constructor(gramSize: number = 3, skipSize: number = 1) {
+        this.gramSize = gramSize
+        this.skipSize = skipSize
 
         this.gram = []
         this.skip = []
@@ -155,9 +164,9 @@ export class Corpus {
 
     /**
      * Creates a new corpus with characters converted to their unshifted counterparts
-     * @returns {Grams} The new corpus
+     * @returns The new corpus
      */
-    unshift() {
+    unshift(): Corpus {
         let corpus = new Corpus()
 
         for (const grams of this.gram) {
@@ -174,11 +183,11 @@ export class Corpus {
 
     /**
      * Creates a new corpus with only ngrams that contain a set of letters
-     * @param {string} letters The set of letters that all ngrams must contain
+     * @param letters The set of letters that all ngrams must contain
      * @returns The new corpus
      */
-    contains(letters) {
-        let func = (x) => [...x].every(y => letters.includes(y))
+    contains(letters: string) {
+        let func = (x: string) => [...x].every(y => letters.includes(y))
         let corpus = new Corpus()
         
         for (const grams of this.gram) {
@@ -195,10 +204,10 @@ export class Corpus {
 
     /**
      * Builds a corpus class from text and populates it with ngrams, skips, and words
-     * @param {string} text The text to iterate over
+     * @param text The text to iterate over
      * @returns The new corpus
      */
-    static fromText(text) {
+    static fromText(text: string) {
         let corpus = new Corpus()
 
         for (let _=0; _ < corpus.gramSize; _++) {
@@ -243,24 +252,29 @@ export class Corpus {
 
     /**
      * Loads in text from a file and constructs a corpus from it
-     * @param {string} url The name of the corpus
+     * @param url The name of the corpus
      * @returns The new corpus
      */
-    static async load(url) {
+    static async load(url: string) {
         let text = await (await fetch(`corpora/${url}.txt`)).text()
         return Corpus.fromText(text)
     }
 }
 
-class Pos {
+export class Pos {
+    x: number
+    y: number
+    f: number
+    h: number
+    p: number
     /**
      * Describes the location and finger for a key on a keyboard
-     * @param {number} x The column offset of the key
-     * @param {number} y The row offset of the key
-     * @param {number} f The finger used to press this key
-     * @param {number} p The unique index of the key
+     * @param x The column offset of the key
+     * @param y The row offset of the key
+     * @param f The finger used to press this key
+     * @param p The unique index of the key
      */
-    constructor(x, y, f, p) {
+    constructor(x: number, y: number, f: number, p: number) {
         this.x = x
         this.y = y
         this.f = f
@@ -270,13 +284,16 @@ class Pos {
 }
 
 export class Metric {
+    name: string
+    func: any
+    size: number
     /**
      * Wrapper class for metrics
-     * @param {string} name The name of the metric
-     * @param {any} func The metric function, which takes ...Pos and returns true when matched
-     * @param {size} size The length of the target ngram 
+     * @param name The name of the metric
+     * @param func The metric function, which takes ...Pos and returns true when matched
+     * @param size The length of the target ngram 
      */
-    constructor(name, func, size) {
+    constructor(name: string, func: any, size: number) {
         this.name = name
         this.func = func
         this.size = size
@@ -284,50 +301,53 @@ export class Metric {
 
     /**
      * Checks if the list of positions is a part of the metric definition
-     * @param {Pos[]} pos The list of positions
-     * @returns {boolean} Returns true if the sequence is an example of the metric
+     * @param pos The list of positions
+     * @returns Returns true if the sequence is an example of the metric
      */
-    compile(...pos) {
+    compile(...pos: Pos[]): boolean {
         return this.func(...pos)
     }
 
     /**
      * Creates a new monogram metric
-     * @param {string} name The name of the metric
-     * @param {any} func The metric function
-     * @returns {Metric} The new metric
+     * @param name The name of the metric
+     * @param func The metric function
+     * @returns The new metric
      */
-    static monogram(name, func) {
+    static monogram(name: string, func: any): Metric {
         return new Metric(name, func, 1)
     }
 
     /**
      * Creates a new bigram metric
-     * @param {string} name The name of the metric
-     * @param {any} func The metric function
-     * @returns {Metric} The new metric
+     * @param name The name of the metric
+     * @param func The metric function
+     * @returns The new metric
      */
-    static bigram(name, func) {
+    static bigram(name: string, func: any): Metric {
         return new Metric(name, func, 2)
     }
 
     /**
      * Creates a new trigram metric
-     * @param {string} name The name of the metric
-     * @param {any} func The metric function
-     * @returns {Metric} The new metric
+     * @param name The name of the metric
+     * @param func The metric function
+     * @returns The new metric
      */
-    static trigram(name, func) {
+    static trigram(name: string, func: any): Metric {
         return new Metric(name, func, 3)
     }
 }
 
 export class Metrics {
+    metrics: Metric[]
+    gram: any[][]
+
     /**
      * A collection of metrics
-     * @param {Metric[]} metrics A list of metrics
+     * @param metrics A list of metrics
      */
-    constructor(...metrics) {
+    constructor(...metrics: Metric[]) {
         this.metrics = metrics
         this.gram = Array(3).fill(null).map(x => [])
 
@@ -350,23 +370,26 @@ export class Metrics {
 }
 
 class Board {
+    board: Pos[]
+    table: any[]
+    
     /**
      * A collection of key positions
-     * @param {Pos[]} board The list of positions
+     * @param board The list of positions
      */
-    constructor(board) {
+    constructor(board: Pos[]) {
         this.board = board
         this.table = []
     }
 
     /**
      * Builds a table mapping ngram sequences to a set of stats
-     * @param {Metrics} metrics A collection of metrics
+     * @param metrics A collection of metrics
      */
-    compile(metrics) {
+    compile(metrics: Metrics) {
         for (const [i, stats] of Object.entries(metrics.gram)) {
             for (const seq of Util.product([...this.board.keys()], parseInt(i) + 1)) {
-                const pos = seq.map(x => this.board[x]) 
+                const pos = seq.map((x: number) => this.board[x]) 
                 const compiled = stats.filter(x => x.compile(...pos))
 
                 if (compiled.length) {
@@ -378,10 +401,10 @@ class Board {
     
     /**
      * Creates a new board from an array of strings following typical fingermap formatting
-     * @param {string[]} arr A list of strings representing rows on a keyboard
-     * @returns {Board} A new board
+     * @param arr A list of strings representing rows on a keyboard
+     * @returns A new board
      */
-    static fromArray(arr) {
+    static fromArray(arr: string[]): Board {
         const board = []
 
         let index = 0
@@ -405,15 +428,18 @@ class Board {
 }
 
 export class Layout {
+    name: string
+    author: string
+    board: Board
+    layers: string[]
     /**
      * Contains common layout information
-     * @param {Object} data
-     * @param {string} data.name
-     * @param {string} data.author
-     * @param {Board} data.board
-     * @param {string[]} data.layers
+     * @param name
+     * @param author
+     * @param board
+     * @param layers
      */
-    constructor({name, author, board, layers}) {
+    constructor(name: string, author: string, board: Board, layers: string[]) {
         this.name = name ?? "Untitled"
         this.author = author ?? "Unknown"
         this.board = board
@@ -422,26 +448,26 @@ export class Layout {
     
     /**
      * Creates a layout from a layout json format
-     * @param {any} data The json data
+     * @param data The json data
      */
-    static fromJson(data) {
-        return new Layout({
-            name: data.name,
-            author: data.author,
-            board: Board.fromArray(data.board), 
-            layers: data.layers.map(x => [...x]),
-        })
+    static fromJson(data: any) {
+        return new Layout(
+            data.name,
+            data.author,
+            Board.fromArray(data.board), 
+            data.layers.map((x: string) => [...x]),
+        )
     }
 }
 
 class ScoreBoard {
+    stat: {[key: string]: any}
     /**
      * Keeps track of stat calculations
-     * @param {Object} data
-     * @param {Corpus} data.corpus The corpus used to calculate the stats
-     * @param {Metrics} data.metrics The metrics containing the stats
+     * @param corpus The corpus used to calculate the stats
+     * @param metrics The metrics containing the stats
      */
-    constructor({corpus, metrics}) {
+    constructor(corpus: Corpus, metrics: Metrics) {
         this.stat = {} 
         for (const stat of metrics.metrics) {
             this.stat[stat.name] = {
@@ -453,12 +479,11 @@ class ScoreBoard {
 
     /**
      * Updates the stat information
-     * @param {Object} data
-     * @param {Metric[]} data.stats The list of stats to update
-     * @param {string} data.gram The gram to include as an example of the given stats
-     * @param {number} data.count The number of times the gram occurs in the corpus
+     * @param stats The list of stats to update
+     * @param gram The gram to include as an example of the given stats
+     * @param count The number of times the gram occurs in the corpus
      */
-    update({stats, gram, count}) {
+    update(stats: Metric[], gram: string, count: number) {
         for (const stat of stats.map(x => this.stat[x.name])) {
             stat.count += count
             stat.grams.grams[gram] = (stat.grams.grams[gram] ?? 0) + count
@@ -467,34 +492,37 @@ class ScoreBoard {
 }
 
 export class Analyzer {
+    layout: Layout
+    corpus: Corpus
+    metrics: Metrics
+
     /**
      * Common analysis tools
-     * @param {Object} data
-     * @param {Layout} data.layout The layout to use during analysis
-     * @param {Corpus} data.corpus The corpus to source ngram data from
-     * @param {Metrics} data.metrics The metrics to calculate
+     * @param layout The layout to use during analysis
+     * @param corpus The corpus to source ngram data from
+     * @param metrics The metrics to calculate
      */
-    constructor({layout, corpus, metrics}) {
+    constructor(layout: Layout, corpus: Corpus, metrics: Metrics) {
         this.layout = layout
-        this.corpus = corpus.unshift().contains(layout.layers.flat())
+        this.corpus = corpus.unshift().contains(layout.layers.flat().join(""))
         this.metrics = metrics
         layout.board.compile(metrics)
     }
 
     /**
      * Calculates the score for a given layout
-     * @returns {ScoreBoard} A scoreboard containing score information
+     * @returns A scoreboard containing score information
      */
-    analyze() {
-        const scores = new ScoreBoard({
-            corpus: this.corpus, 
-            metrics: this.metrics
-        })
+    analyze(): ScoreBoard {
+        const scores = new ScoreBoard(
+            this.corpus, 
+            this.metrics
+        )
 
         for (const [seq, stats] of this.layout.board.table) {
-            const gram = seq.map(x => this.layout.layers[0][x]).join("")
+            const gram = seq.map((x: number) => this.layout.layers[0][x]).join("")
             const count = this.corpus.gram[seq.length - 1].count(gram)
-            scores.update({stats: stats, gram: gram, count: count})
+            scores.update(stats, gram, count)
         }
 
         return scores
