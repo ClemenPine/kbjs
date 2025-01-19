@@ -38,10 +38,12 @@ async function main() {
             kb.Metric.bigram("Half Scissor", metric.half_scissor),
             kb.Metric.bigram("Full Scissor", metric.full_scissor),
             kb.Metric.trigram("Redirect", metric.redirect),
-            kb.Metric.trigram("Onehand", metric.onehand),
             kb.Metric.trigram("Roll", metric.roll),
             kb.Metric.trigram("Inward Roll", metric.inroll),
             kb.Metric.trigram("Outward Roll", metric.outroll),
+            kb.Metric.trigram("Onehand", metric.onehand),
+            kb.Metric.trigram("InHand", metric.inhand),
+            kb.Metric.trigram("OutHand", metric.outhand),
         )
     })
     

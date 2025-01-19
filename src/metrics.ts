@@ -48,8 +48,22 @@ export function redirect(a: Pos, b: Pos, c: Pos) {
 export function onehand(a: Pos, b: Pos, c: Pos) {
     return (
         a.h == b.h && b.h == c.h &&
-        a.f != b.f && b.f != c.f && 
+        a.f != b.f && b.f != c.f && a.f != c.f &&
         a.f < b.f == b.f < c.f
+    )
+}
+
+export function inhand(a: Pos, b: Pos, c: Pos) {
+    return (
+        onehand(a, b, c) &&
+        Number(a.f < b.f) != a.h
+    )
+}
+
+export function outhand(a: Pos, b: Pos, c: Pos) {
+    return (
+        onehand(a, b, c) &&
+        Number(a.f < b.f) == a.h
     )
 }
 
