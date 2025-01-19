@@ -33,17 +33,17 @@ async function main() {
         layout: kb.Layout.fromJson(layouts.pinev4),
         corpus: (await kb.Corpus.load("monkeyracer")),
         metrics: new kb.Metrics(
-            kb.Metric.bigram("Same Finger", metric.same_finger),
-            kb.Metric.bigram("Lateral Stretch", metric.lateral_stretch),
-            kb.Metric.bigram("Half Scissor", metric.half_scissor),
-            kb.Metric.bigram("Full Scissor", metric.full_scissor),
+            kb.Metric.bigram("SFB", metric.same_finger),
+            kb.Metric.bigram("LSB", metric.lateral_stretch),
+            kb.Metric.bigram("HSB", metric.half_scissor),
+            kb.Metric.bigram("FSB", metric.full_scissor),
             kb.Metric.trigram("Redirect", metric.redirect),
             kb.Metric.trigram("Roll", metric.roll),
-            kb.Metric.trigram("Inward Roll", metric.inroll),
-            kb.Metric.trigram("Outward Roll", metric.outroll),
+            kb.Metric.trigram("Inroll", metric.inroll),
+            kb.Metric.trigram("Outroll", metric.outroll),
             kb.Metric.trigram("Onehand", metric.onehand),
-            kb.Metric.trigram("InHand", metric.inhand),
-            kb.Metric.trigram("OutHand", metric.outhand),
+            kb.Metric.trigram("Inhand", metric.inhand),
+            kb.Metric.trigram("Outhand", metric.outhand),
         )
     })
     
