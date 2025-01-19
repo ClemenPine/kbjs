@@ -12,9 +12,9 @@ class Util {
 
     /**
      * Zips two arrays into a dictionary, a la python
-     * @param {string} arr1 The array mapped to keys
-     * @param {string} arr2 The array mapped to values
-     * @returns {any} The dictionary
+     * @param arr1 The array mapped to keys
+     * @param arr2 The array mapped to values
+     * @returns The dictionary
      */
     static dictzip(arr1: string, arr2: string): {[key: string]: string} {
         const res: {[key: string]: string} = {}
@@ -372,7 +372,7 @@ export class Metrics {
 class Board {
     board: Pos[]
     table: any[]
-    
+
     /**
      * A collection of key positions
      * @param board The list of positions
@@ -498,15 +498,16 @@ export class Analyzer {
 
     /**
      * Common analysis tools
-     * @param layout The layout to use during analysis
-     * @param corpus The corpus to source ngram data from
-     * @param metrics The metrics to calculate
+     * @param data
+     * @param data.layout The layout to use during analysis
+     * @param data.corpus The corpus to source ngram data from
+     * @param data.metrics The metrics to calculate
      */
-    constructor(layout: Layout, corpus: Corpus, metrics: Metrics) {
-        this.layout = layout
-        this.corpus = corpus.unshift().contains(layout.layers.flat().join(""))
-        this.metrics = metrics
-        layout.board.compile(metrics)
+    constructor(data: {layout: Layout, corpus: Corpus, metrics: Metrics}) {
+        this.layout = data.layout
+        this.corpus = data.corpus.unshift().contains(data.layout.layers.flat().join(""))
+        this.metrics = data.metrics
+        data.layout.board.compile(data.metrics)
     }
 
     /**

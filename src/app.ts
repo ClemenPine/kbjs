@@ -29,10 +29,10 @@ async function main() {
         }
     }
     
-    const analyzer = new kb.Analyzer(
-        kb.Layout.fromJson(layouts.pinev4),
-        (await kb.Corpus.load("monkeyracer")),
-        new kb.Metrics(
+    const analyzer = new kb.Analyzer({
+        layout: kb.Layout.fromJson(layouts.pinev4),
+        corpus: (await kb.Corpus.load("monkeyracer")),
+        metrics: new kb.Metrics(
             kb.Metric.bigram("Same Finger", metric.same_finger),
             kb.Metric.bigram("Lateral Stretch", metric.lateral_stretch),
             kb.Metric.bigram("Half Scissor", metric.half_scissor),
@@ -43,7 +43,7 @@ async function main() {
             kb.Metric.trigram("Inward Roll", metric.inroll),
             kb.Metric.trigram("Outward Roll", metric.outroll),
         )
-    )
+    })
     
     console.log(analyzer.analyze())
 }
