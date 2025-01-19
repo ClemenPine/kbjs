@@ -35,9 +35,9 @@ class Grams {
      * @param grams A dictionary mapping strings to counts
      * @param total The total gram count
      */
-    constructor(grams: {[key: string]: number} = {}, total: number = 0) {
-        this.grams = grams
-        this.total = total
+    constructor(grams?: {[key: string]: number}, total?: number) {
+        this.grams = grams ?? {}
+        this.total = total ?? 0
     }
 
     /**
@@ -137,9 +137,9 @@ export class Corpus {
      * @param gramSize The maximum ngram size to process
      * @param skipSize The maximum skipgram distance
      */
-    constructor(gramSize: number = 3, skipSize: number = 1) {
-        this.gramSize = gramSize
-        this.skipSize = skipSize
+    constructor(gramSize?: number, skipSize?: number) {
+        this.gramSize = gramSize ?? 3
+        this.skipSize = skipSize ?? 1
 
         this.gram = []
         this.skip = []
@@ -432,12 +432,9 @@ export class Layout {
     author: string
     board: Board
     layers: string[]
+
     /**
      * Contains common layout information
-     * @param name
-     * @param author
-     * @param board
-     * @param layers
      */
     constructor(name: string, author: string, board: Board, layers: string[]) {
         this.name = name ?? "Untitled"
