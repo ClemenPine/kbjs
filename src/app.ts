@@ -51,12 +51,13 @@ async function main() {
     })
     
     console.log(layout.keymap())
-
     const scores = analyzer.analyze()
 
     const stat = "SFB"
+    const freq = scores.freq(stat)
     const sfbs = scores.examples(stat)
-    console.log(`Example of ${stat}`)
+
+    console.log(`Example of ${stat} (${(freq * 100).toFixed(3)}%)`)
     for (const x of sfbs.top(10)) {
         console.log(x, (sfbs.freq(x) * 100).toFixed(3) + "%")
     }

@@ -545,6 +545,20 @@ class ScoreBoard {
         }
     }
 
+    /**
+     * Gets the frequency for a given stat
+     * @param stat The name of the stat
+     * @returns A float representing the frequency of occurrence
+     */
+    freq(stat: string): number {
+        return this.stat[stat].count / this.stat[stat].grams.total
+    }
+
+    /**
+     * Gets examples of ngram frequencies for a given stat
+     * @param stat The name of the stat
+     * @returns A grams class containing the gram examples
+     */
     examples(stat: string): Grams {
         return this.stat[stat].grams
     }
