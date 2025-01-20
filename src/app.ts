@@ -50,8 +50,16 @@ async function main() {
         )
     })
     
-    console.log(analyzer.analyze())
     console.log(layout.keymap())
+
+    const scores = analyzer.analyze()
+
+    const stat = "SFB"
+    const sfbs = scores.examples(stat)
+    console.log(`Example of ${stat}`)
+    for (const x of sfbs.top(10)) {
+        console.log(x, (sfbs.freq(x) * 100).toFixed(3) + "%")
+    }
 }
 
 main()

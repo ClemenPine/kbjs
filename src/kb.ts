@@ -60,7 +60,7 @@ class Grams {
         let uBound = n > 0 ? n : this.grams.length
         
         return Object.keys(this.grams)
-            .sort((a, b) => this.count(a) - this.count(b))
+            .sort((a, b) => this.count(b) - this.count(a))
             .slice(lBound, uBound)
     }
 
@@ -244,8 +244,6 @@ export class Corpus {
         if (word) {
             corpus.word.add(word)
         }
-
-        console.log("Loaded Corpus")
 
         return corpus
     }
@@ -487,10 +485,11 @@ export class Layout {
 
     /**
      * Creates the string representation of the layout's keys
+     * @param layer Keymap layer, (default 0)
      * @returns String representation
      */
-    keymap(): string {
-        return this.board.keymap([...this.layers[0]])
+    keymap(layer: number = 0): string {
+        return this.board.keymap([...this.layers[layer]])
     }
 
     /**
@@ -517,7 +516,7 @@ export class Layout {
 }
 
 class ScoreBoard {
-    stat: {[key: string]: any}
+    stat: {[key: string]: {count: number, grams: Grams}}
     /**
      * Keeps track of stat calculations
      * @param corpus The corpus used to calculate the stats
@@ -544,6 +543,10 @@ class ScoreBoard {
             stat.count += count
             stat.grams.grams[gram] = (stat.grams.grams[gram] ?? 0) + count
         }
+    }
+
+    examples(stat: string): Grams {
+        return this.stat[stat].grams
     }
 }
 
