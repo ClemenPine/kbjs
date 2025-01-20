@@ -29,8 +29,11 @@ async function main() {
         }
     }
     
+    const layout = kb.Layout.fromJson(layouts.pinev4)
+    // const layout = kb.Layout.fromJson(layouts.buggy)
+    
     const analyzer = new kb.Analyzer({
-        layout: kb.Layout.fromJson(layouts.pinev4),
+        layout: layout,
         corpus: (await kb.Corpus.load("monkeyracer")),
         metrics: new kb.Metrics(
             kb.Metric.bigram("SFB", metric.same_finger),
@@ -48,6 +51,7 @@ async function main() {
     })
     
     console.log(analyzer.analyze())
+    console.log(layout.keymap())
 }
 
 main()

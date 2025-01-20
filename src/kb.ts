@@ -146,19 +146,19 @@ export class Corpus {
         this.word = new Grams()
     }
 
-    get monogram() {
+    get monogram(): Grams {
         return this.gram[0]
     }
 
-    get bigram() {
+    get bigram(): Grams {
         return this.gram[1]
     }
 
-    get trigram() {
+    get trigram(): Grams {
         return this.gram[2]
     }
 
-    get skipgram() {
+    get skipgram(): Grams {
         return this.skip[0]
     }
 
@@ -341,7 +341,7 @@ export class Metric {
 
 export class Metrics {
     metrics: Metric[]
-    gram: any[][]
+    gram: Metric[][]
 
     /**
      * A collection of metrics
@@ -356,15 +356,15 @@ export class Metrics {
         }
     } 
     
-    get monogram() {
+    get monogram(): Metric[] {
         return this.gram[0]
     }
 
-    get bigram() {
+    get bigram(): Metric[] {
         return this.gram[1]
     }
 
-    get trigram() {
+    get trigram(): Metric[] {
         return this.gram[2]
     }
 }
@@ -397,6 +397,48 @@ class Board {
                 }
             }
         }
+    }
+
+    /**
+     * Stringified representation of a board
+     * @param arr A sequence to map onto the board
+     * @returns String representation
+     */
+    keymap(arr: string[]): string {
+        let row: string[] = []
+        let col: string[] = []
+        
+        let prev_x = -1
+        let prev_y = 0
+        let prev_h = 0
+        for (const pos of this.board) {
+            let ch = arr[pos.p] ?? "~"
+
+            if (prev_h < pos.h) {
+                ch = " " + ch
+            }
+
+            if (prev_y < pos.y) {
+                col.push(row.join(" "))
+                row = []
+            }
+
+            for (let i=0; i < Math.max(pos.x - prev_x - 1, 0); i++) {
+                row.push(" ")
+            }
+
+            row.push(ch)
+
+            prev_x = pos.x
+            prev_y = pos.y
+            prev_h = pos.h
+        }
+
+        if (row.length) {
+            col.push(row.join(" "))
+        }
+
+        return col.join("\n")
     }
     
     /**
@@ -442,12 +484,29 @@ export class Layout {
         this.board = board
         this.layers = layers
     }
+
+    /**
+     * Creates the string representation of the layout's keys
+     * @returns String representation
+     */
+    keymap(): string {
+        return this.board.keymap([...this.layers[0]])
+    }
+
+    /**
+     * String representation of the fingermap of the layout
+     * @returns String representation
+     */
+    fingermap(): string {
+        return this.board.keymap(this.board.board.map(x => String(x.f)))
+    }
     
     /**
      * Creates a layout from a layout json format
      * @param data The json data
+     * @returns A new layout
      */
-    static fromJson(data: any) {
+    static fromJson(data: any): Layout {
         return new Layout(
             data.name,
             data.author,
