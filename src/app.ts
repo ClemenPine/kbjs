@@ -53,7 +53,7 @@ async function main() {
     console.log(layout.keymap())
     const scores = analyzer.analyze()
 
-    const stat = "SFB"
+    const stat = "LSB"
     const freq = scores.freq(stat)
     const sfbs = scores.examples(stat)
 

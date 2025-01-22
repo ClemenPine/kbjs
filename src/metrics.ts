@@ -14,6 +14,7 @@ export function same_finger(a: Pos, b: Pos) {
 export function lateral_stretch(a: Pos, b: Pos) {
     return (
         a.h == b.h &&
+        ![a, b].some(x => [4, 5].includes(x.f)) &&
         Math.abs(a.f - b.f) == 1 &&
         Math.abs(a.x - b.x) >= 2
     )
