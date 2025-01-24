@@ -55,7 +55,7 @@ class Grams {
      * @param n The number of ngrams, n > 0 for n largest, n < 0 for n smallest, n = 0 for all
      * @returns A dictionary mapping the top grams to their counts
      */
-    top(n: number = 0): any {
+    top(n: number = 0): string[] {
         let lBound = n < 0 ? n : 0
         let uBound = n > 0 ? n : this.grams.length
         
@@ -81,9 +81,10 @@ class Grams {
     /**
      * Creates a new gram collection with ngrams filtered by some function
      * @param func The function to apply on each gram
+     * @param gramTotal Set total equal to grams
      * @returns The new grams
      */
-    filter(func: any): Grams {
+    filter(func: (x: string) => boolean, gramTotal: boolean = false): Grams {
         let grams = new Grams()
         for (const [k, v] of Object.entries(this.grams)) {
             if (func(k)) {
@@ -91,6 +92,7 @@ class Grams {
             }
         }
 
+        grams.total = gramTotal ? grams.total : this.total
         return grams
     }
 
@@ -128,8 +130,8 @@ class Grams {
 export class Corpus {
     gramSize: number
     skipSize: number
-    gram: any[]
-    skip: any[]
+    gram: Grams[]
+    skip: Grams[]
     word: Grams
 
     /**
@@ -191,14 +193,14 @@ export class Corpus {
         let corpus = new Corpus()
         
         for (const grams of this.gram) {
-            corpus.gram.push(grams.filter(func))
+            corpus.gram.push(grams.filter(func, true))
         }
         
         for (const skips of this.skip) {
-            corpus.skip.push(skips.filter(func))
+            corpus.skip.push(skips.filter(func, true))
         }
 
-        corpus.word = this.word.filter(func)
+        corpus.word = this.word.filter(func, true)
         return corpus
     }
 
@@ -283,7 +285,7 @@ export class Pos {
 
 export class Metric {
     name: string
-    func: any
+    func: (...args: Pos[]) => boolean
     size: number
     /**
      * Wrapper class for metrics
@@ -291,7 +293,7 @@ export class Metric {
      * @param func The metric function, which takes ...Pos and returns true when matched
      * @param size The length of the target ngram 
      */
-    constructor(name: string, func: any, size: number) {
+    constructor(name: string, func: (...args: Pos[]) => boolean, size: number) {
         this.name = name
         this.func = func
         this.size = size
@@ -312,7 +314,7 @@ export class Metric {
      * @param func The metric function
      * @returns The new metric
      */
-    static monogram(name: string, func: any): Metric {
+    static monogram(name: string, func: (...args: Pos[]) => boolean): Metric {
         return new Metric(name, func, 1)
     }
 
@@ -322,7 +324,7 @@ export class Metric {
      * @param func The metric function
      * @returns The new metric
      */
-    static bigram(name: string, func: any): Metric {
+    static bigram(name: string, func: (...args: Pos[]) => boolean): Metric {
         return new Metric(name, func, 2)
     }
 
@@ -332,7 +334,7 @@ export class Metric {
      * @param func The metric function
      * @returns The new metric
      */
-    static trigram(name: string, func: any): Metric {
+    static trigram(name: string, func: (...args: Pos[]) => boolean): Metric {
         return new Metric(name, func, 3)
     }
 }
@@ -369,7 +371,7 @@ export class Metrics {
 
 class Board {
     board: Pos[]
-    table: any[]
+    table: [number[], Metric[]][]
 
     /**
      * A collection of key positions
@@ -481,6 +483,15 @@ export class Layout {
         this.author = author ?? "Unknown"
         this.board = board
         this.layers = layers
+    }
+
+    /**
+     * Find the positions of a given char(s)
+     * @param chars A string containing the chars to find
+     * @returns A list of positions on the layout that contain those chars
+     */
+    pos(chars: string): Pos[] {
+        return this.board.board.filter(x => chars.includes(this.layers[0][x.p]))
     }
 
     /**
