@@ -473,12 +473,12 @@ export class Layout {
     name: string
     author: string
     board: Board
-    layers: string[]
+    layers: string[][]
 
     /**
      * Contains common layout information
      */
-    constructor(name: string, author: string, board: Board, layers: string[]) {
+    constructor(name: string, author: string, board: Board, layers: string[][]) {
         this.name = name ?? "Untitled"
         this.author = author ?? "Unknown"
         this.board = board
@@ -492,6 +492,12 @@ export class Layout {
      */
     pos(chars: string): Pos[] {
         return this.board.board.filter(x => chars.includes(this.layers[0][x.p]))
+    }
+
+    swap(a: number, b: number) {
+        [this.layers[0][a], this.layers[0][b]] = [
+            this.layers[0][b], this.layers[0][a]
+        ]
     }
 
     /**
