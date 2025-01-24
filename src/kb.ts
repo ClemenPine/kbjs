@@ -88,8 +88,8 @@ class Grams {
      * @returns A dictionary mapping the top grams to their counts
      */
     top(n: number = 0): string[] {
-        let lBound = n < 0 ? n : 0
-        let uBound = n > 0 ? n : this.grams.length
+        const lBound = n < 0 ? n : 0
+        const uBound = n > 0 ? n : this.grams.length
         
         return Object.keys(this.grams)
             .sort((a, b) => this.count(b) - this.count(a))
@@ -101,9 +101,9 @@ class Grams {
      * @returns The new grams
      */
     unshift(): Grams {        
-        let grams = new Grams()
+        const grams = new Grams()
         for (const [k, v] of Object.entries(this.grams)) {
-            let gram = [...k].map(x => Grams.shift(x)).join("")
+            const gram = [...k].map(x => Grams.shift(x)).join("")
             grams.add(gram, v)
         }
 
@@ -117,7 +117,7 @@ class Grams {
      * @returns The new grams
      */
     filter(func: (x: string) => boolean, gramTotal: boolean = false): Grams {
-        let grams = new Grams()
+        const grams = new Grams()
         for (const [k, v] of Object.entries(this.grams)) {
             if (func(k)) {
                 grams.add(k, v)
@@ -201,7 +201,7 @@ export class Corpus {
      * @returns The new corpus
      */
     unshift(): Corpus {
-        let corpus = new Corpus()
+        const corpus = new Corpus()
 
         for (const grams of this.gram) {
             corpus.gram.push(grams.unshift())
@@ -221,8 +221,8 @@ export class Corpus {
      * @returns The new corpus
      */
     contains(letters: string) {
-        let func = (x: string) => [...x].every(y => letters.includes(y))
-        let corpus = new Corpus()
+        const func = (x: string) => [...x].every(y => letters.includes(y))
+        const corpus = new Corpus()
         
         for (const grams of this.gram) {
             corpus.gram.push(grams.filter(func, true))
@@ -242,7 +242,7 @@ export class Corpus {
      * @returns The new corpus
      */
     static fromText(text: string) {
-        let corpus = new Corpus()
+        const corpus = new Corpus()
 
         for (let _=0; _ < corpus.gramSize; _++) {
             corpus.gram.push(new Grams())
@@ -263,7 +263,7 @@ export class Corpus {
             }
 
             if (/\s/.test(text[i])) {
-                let word = text.slice(wordIndex, i)
+                const word = text.slice(wordIndex, i)
 
                 if (word) {
                     corpus.word.add(word)
@@ -273,7 +273,7 @@ export class Corpus {
             }
         }
 
-        let word = text.slice(wordIndex)
+        const word = text.slice(wordIndex)
 
         if (word) {
             corpus.word.add(word)
@@ -288,7 +288,7 @@ export class Corpus {
      * @returns The new corpus
      */
     static async load(url: string) {
-        let text = await (await fetch(`corpora/${url}.txt`)).text()
+        const text = await (await fetch(`corpora/${url}.txt`)).text()
         return Corpus.fromText(text)
     }
 }
