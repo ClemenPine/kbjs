@@ -494,6 +494,11 @@ export class Layout {
         return this.board.board.filter(x => chars.includes(this.layers[0][x.p]))
     }
 
+    /**
+     * Swap two positions on the layout
+     * @param a The first position's index
+     * @param b The second position's index
+     */
     swap(a: number, b: number) {
         [this.layers[0][a], this.layers[0][b]] = [
             this.layers[0][b], this.layers[0][a]
