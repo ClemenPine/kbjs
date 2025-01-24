@@ -1,5 +1,26 @@
 class Util {
     /**
+     * Get the combinations of an array
+     * @param arr The range to get the combinations for
+     * @param n The length of each combination
+     * @returns Array of tuples containing the combinations
+     */
+    static combinations(arr: any[], n: number): any[][] {
+        if (n == 1) {
+            return arr.map((item) => [item])
+        }
+
+        const combinations: any[][] = []
+        
+        arr.forEach((item, index) => {
+          const smallerCombinations = this.combinations(arr.slice(index + 1), n - 1)
+          smallerCombinations.forEach((combo) => combinations.push([item, ...combo]))
+        })
+
+        return combinations
+    }      
+    
+    /**
      * Computes the product of an array with repetition
      * @param array An array of arbitrary objects
      * @param repeat The number of times to repeat the array
@@ -23,6 +44,17 @@ class Util {
         }
 
         return res
+    }
+
+    /**
+     * Shuffles an array in place
+     * @param arr The array to be shuffled
+     */
+    static shuffle(arr: any[]) {
+        for (let i = arr.length - 1; i >= 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
     }
 }
 
@@ -499,10 +531,19 @@ export class Layout {
      * @param a The first position's index
      * @param b The second position's index
      */
-    swap(a: number, b: number) {
+    do_swap(a: number, b: number) {
         [this.layers[0][a], this.layers[0][b]] = [
             this.layers[0][b], this.layers[0][a]
         ]
+    }
+
+    /**
+     * Undoes a swap
+     * @param a The first position's index
+     * @param b The second position's index
+     */
+    undo_swap(a: number, b: number) {
+        this.do_swap(a, b)
     }
 
     /**
@@ -520,6 +561,17 @@ export class Layout {
      */
     fingermap(): string {
         return this.board.keymap(this.board.board.map(x => String(x.f)))
+    }
+
+    clone(): Layout {
+        const newLayout = new Layout(
+            "Generated",
+            "KBJS",
+            this.board,
+            this.layers.map(x => [...x])
+        )
+
+        return newLayout
     }
     
     /**
@@ -565,6 +617,13 @@ class ScoreBoard {
             stat.count += count
             stat.grams.grams[gram] = (stat.grams.grams[gram] ?? 0) + count
         }
+    }
+
+    /**
+     * TD
+     */
+    score() {
+        return this.stat["SFB"].count
     }
 
     /**
@@ -625,9 +684,43 @@ export class Analyzer {
     }
 
     /**
-     * TD
+     * Generate some layouts from a base layout
+     * @param rounds The number of layouts to generate
+     * @returns A list of generated layouts
      */
-    generate() {
+    optimize(rounds: number = 1): Layout[] {
+        const template = this.layout
+        const layouts: Layout[] = []
+
+        const combos = Util.combinations([...this.layout.layers[0].keys()], 2)
         
+        for (let round = 0; round < rounds; round++) {
+            this.layout = template.clone()
+            let score = this.analyze().score()
+    
+            let running = true
+            while (running) {
+                running = false
+                
+                Util.shuffle(combos)
+                for (const [a, b] of combos) {
+                    this.layout.do_swap(a, b)
+    
+                    const new_score = this.analyze().score()
+                    if (new_score < score) {
+                        score = new_score
+                        running = true
+                        break
+                    }
+    
+                    this.layout.undo_swap(a, b)
+                }
+            }
+    
+            layouts.push(this.layout)
+        }
+
+        this.layout = template
+        return layouts
     }
 }
