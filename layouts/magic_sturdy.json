@@ -1,36 +1,13 @@
 {
-    "name": "Magic Sturdy",
-    "author": "Ikcelaks",
-    "layers": [
-        "vmlcpb^uo,strdyfneaixkjgwzh'?."
-    ],
+    "name": "magic_sturdy",
     "board": [
         "0 1 2 3 3 6 6 7 8 9",
         "0 1 2 3 3 6 6 7 8 9",
-        "0 1 2 3 3 6 6 7 8 9"
+        "0 1 2 3 3 6 6 7 8 9",
+        "5"
     ],
     "combos": {},
-    "magic": {
-        "a^": "ao",
-        "b^": "before",
-        "c^": "cy",
-        "d^": "dy",
-        "e^": "eu",
-        "g^": "gy",
-        "i^": "ion",
-        "j^": "just",
-        "k^": "ks",
-        "l^": "lk",
-        "m^": "ment",
-        "n^": "nion",
-        "o^": "oa",
-        "r^": "rl",
-        "s^": "sk",
-        "t^": "tment",
-        "u^": "ue",
-        "v^": "ver",
-        "w^": "which",
-        "x^": "xes",
-        "y^": "yp"
-    }
+    "layers": [
+        "vmlcpb*uo,strdyfneaixkjgwzh;'.@"
+    ]
 }

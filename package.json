@@ -1,0 +1,13 @@
+{
+    "name": "kbjs",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "scripts": {
+        "dev": "nodemon --ext ts --exec 'tsc && node bin/server.js'"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ClemenPine/kbjs.git"
+    }
+}

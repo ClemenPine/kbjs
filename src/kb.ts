@@ -281,16 +281,6 @@ export class Corpus {
 
         return corpus
     }
-
-    /**
-     * Loads in text from a file and constructs a corpus from it
-     * @param url The name of the corpus
-     * @returns The new corpus
-     */
-    static async load(url: string) {
-        const text = await (await fetch(`corpora/${url}.txt`)).text()
-        return Corpus.fromText(text)
-    }
 }
 
 export class Pos {
