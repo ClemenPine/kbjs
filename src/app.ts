@@ -5,6 +5,16 @@ import express, { Application, Request, Response } from "express";
 import * as kb from "./kb.js"
 import * as metric from "./metrics.js"
 
+class Util {
+    static makeRegex(regex: string): RegExp | undefined {
+        try {
+            return new RegExp(regex ?? ".*")
+        } catch (error) {
+            return
+        }
+    }
+}
+
 class API {
     readonly LAYOUT_DIR = "./layouts"
     readonly CORPUS_DIR = "./corpora"
@@ -36,12 +46,13 @@ class API {
         console.log("  Done!")
     }
 
-    grams(data: {corpName: string, ngram: number, n: number, noshift: boolean, nospace: boolean}): [string, number][] {
+    grams(data: {corpName: string, ngram: number, n: number, regex?: RegExp, noshift: boolean, nospace: boolean}): [string, number][] {
         const res: [string, number][] = []
 
         let grams = this.corpora[data.corpName ?? "monkeyracer"].gram[data.ngram - 1]
         grams = data.noshift ? grams.unshift() : grams
-        grams = data.nospace ? grams.filter(x => !x.includes(" "), true) : grams
+        grams = data.nospace ? grams.filter(x => new RegExp("^\\S*$").test(x), true) : grams
+        grams = data.regex ? grams.filter(x => data.regex!.test(x)) : grams
 
         for (const gram of grams.top(data.n ?? 50)) {
             res.push([gram, grams.freq(gram)])
@@ -70,7 +81,9 @@ class App {
     }
 
     private initRoutes(): void {
-        this.app.post("/api/v1/grams", (req: Request, res: Response) => {
+        this.app.post("/api/v1/grams", (req: Request, res: Response) => {            
+            const regex = Util.makeRegex(req.body.regex)
+            
             if (!req.body.corpus || !req.body.ngram) {
                 res.status(400).json({
                     message: "Missing required fields corpus and ngram"
@@ -83,6 +96,10 @@ class App {
                 res.status(400).json({
                     message: "Ngrams must be between 1-3"
                 })
+            } else if (!regex) {
+                res.status(400).json({
+                    message: "Invalid regex string"
+                })
             } else {
                 res.json(this.api.grams({
                     corpName: req.body.corpus,
@@ -90,6 +107,7 @@ class App {
                     n: req.body.count ?? 50,
                     noshift: req.body.noshift ?? false,
                     nospace: req.body.nospace ?? true,
+                    regex: regex,
                 }))
             }
         })
